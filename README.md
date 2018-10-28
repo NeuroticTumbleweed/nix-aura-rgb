@@ -22,7 +22,7 @@ i2cdetect -l | grep "NVIDIA i2c adapter"
 ```
 #### To get the specific device number run
 ```bash
-ADAPTER=`i2cdetect -l | grep "NVIDIA i2c adapter 1" | cut -f1 | sed /i2c-//`
+ADAPTER=`i2cdetect -l | grep "NVIDIA i2c adapter 1" | cut -f1 | sed s/i2c-//`
 echo ${ADAPTER}
 ```
 
@@ -63,7 +63,7 @@ i2cset -y ${ADAPTER} 0x29 5 ${GREEN_INTENSITY}
 
 #### Setting Blue
 ```bash
-RED_INTENSITY=0xFF
+BLUE_INTENSITY=0xFF
 i2cset -y ${ADAPTER} 0x29 6 ${BLUE_INTENSITY}
 ```
 
