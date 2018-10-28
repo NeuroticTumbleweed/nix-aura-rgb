@@ -33,19 +33,43 @@ MODE_MAP = {
 }
 
 
-def set_color(rgb: int, bus_number=None):
-    """Set the rgb of the graphics card to the given rgb value."""
-    # Mask and shift the rgb value to get the individual colors.
-    r = (rgb & 0xff0000) >> 16
-    g = (rgb & 0x00ff00) >> 8
-    b = rgb & 0x0000ff
+def get_color(bus_number=None):
+    """Get the current RGB value of the graphics card."""
     # Find the bus number if it's not found.
     if not bus_number:
         bus_number = discover_nvidia_bus()
     with smbus2.SMBusWrapper(bus_number) as bus:
-        bus.write_byte_data(RGB_CHIP_ADDRESS, RED_DATA_ADDRESS, r)
-        bus.write_byte_data(RGB_CHIP_ADDRESS, GREEN_DATA_ADDRESS, g)
-        bus.write_byte_data(RGB_CHIP_ADDRESS, BLUE_DATA_ADDRESS, b)
+        red = bus.read_byte_data(RGB_CHIP_ADDRESS, RED_DATA_ADDRESS)
+        green = bus.read_byte_data(RGB_CHIP_ADDRESS, GREEN_DATA_ADDRESS)
+        blue = bus.read_byte_data(RGB_CHIP_ADDRESS, BLUE_DATA_ADDRESS)
+    return (red << 16) + (green << 8) + blue
+
+
+def set_color(rgb: int, bus_number=None):
+    """Set the rgb of the graphics card to the given rgb value."""
+    # Mask and shift the rgb value to get the individual colors.
+    red = (rgb & 0xff0000) >> 16
+    green = (rgb & 0x00ff00) >> 8
+    blue = rgb & 0x0000ff
+    # Find the bus number if it's not found.
+    if not bus_number:
+        bus_number = discover_nvidia_bus()
+    with smbus2.SMBusWrapper(bus_number) as bus:
+        bus.write_byte_data(RGB_CHIP_ADDRESS, RED_DATA_ADDRESS, red)
+        bus.write_byte_data(RGB_CHIP_ADDRESS, GREEN_DATA_ADDRESS, green)
+        bus.write_byte_data(RGB_CHIP_ADDRESS, BLUE_DATA_ADDRESS, blue)
+
+
+def get_mode(bus_number=None):
+    """Get the current mode of the graphics card."""
+    # Find the bus number if it's not found.
+    if not bus_number:
+        bus_number = discover_nvidia_bus()
+    with smbus2.SMBusWrapper(bus_number) as bus:
+        raw_mode = bus.read_byte_data(RGB_CHIP_ADDRESS, MODE_DATA_ADDRESS)
+    for mode, mode_mapped in MODE_MAP.items():
+        if raw_mode == mode_mapped:
+            return mode
 
 
 def set_mode(mode: str, bus_number=None):
