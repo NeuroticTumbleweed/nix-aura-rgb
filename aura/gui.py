@@ -1,11 +1,29 @@
 #!/usr/bin/env python3
 """GUI for the aura GTK."""
+import sys
 
-from main import get_color, set_color, set_mode
-
+import dbus
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk  # noqa: E401
+
+try:
+    BUS = dbus.SystemBus()
+    REMOTE_OBJECT = BUS.get_object("NeuroticTumbleweed.Aura", "/Aura")
+    AURA_INTERFACE = dbus.Interface(
+        REMOTE_OBJECT, "NeuroticTumbleweed.Aura.Interface")
+    AURA_INTERFACE.ping()
+except Exception as e:  # TODO: Make this more specific
+    message_dialog = Gtk.MessageDialog(
+        title="Aura Gtk Error",
+        text="An error occured connecting to the aura service.",
+        secondary_text=f"Traceback:\n {e}",
+        buttons=["Exit Aura Gtk", Gtk.ButtonsType.CLOSE],
+        )
+    message_dialog.run()
+    # message_dialog.run()
+    print(f"dbus failed: {e}")
+    sys.exit()
 
 
 class GtkMainWindow(Gtk.Window):
@@ -62,7 +80,7 @@ class GtkMainWindow(Gtk.Window):
 
         def get_device_color(self):
             color = Gdk.RGBA()
-            color.parse(hex(get_color()).replace("0x", "#"))
+            color.parse(hex(AURA_INTERFACE.get_color()).replace("0x", "#"))
             return color
 
         def set_device_color(self, color_button):
@@ -71,7 +89,7 @@ class GtkMainWindow(Gtk.Window):
             green = round(gdk_rgba.green * 255)
             blue = round(gdk_rgba.blue * 255)
             rgb = (red << 16) + (green << 8) + blue
-            set_color(rgb)
+            AURA_INTERFACE.set_color(rgb)
 
     def _create_radio_buttons(self):
         buttons = []
@@ -87,10 +105,11 @@ class GtkMainWindow(Gtk.Window):
 
     def on_button_toggled(self, button, name):
         if button.get_active():
-            set_mode(name)
+            AURA_INTERFACE.set_mode(name)
 
 
 if __name__ == '__main__':
+
     win = GtkMainWindow()
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
