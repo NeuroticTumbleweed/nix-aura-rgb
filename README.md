@@ -1,14 +1,50 @@
 # Aura GTK
-## GTK interface for configuring lighting on Asus graphics cards.
----
-# DISCLAIMER:
+## Interface for configuring lighting on Asus graphics cards.
+## DISCLAIMER:
 THIS HAS THE POSSIBILITY OF BRICKING YOUR DEVICE.
 
 This code has only been tested to work on a single _Asus Strix 1080._
 With the Nvidia Proprietary driver version _396.54_
 
 I cannot guarantee that it will work on any other cards.
+## Installation:
 
+### Operating system packages
+You'll need to install a few operating system level packages:
+##### On fedora:
+```bash
+sudo dnf install python3-gobject python3-dbus
+```
+##### On Ubuntu/Debian:
+```bash
+sudo apt-get install python3-gi python3-dbus
+```
+
+### Pypi dependencies
+Either a python virtualenvironment needs to be set up as root (prefered)
+or the lazier but not great way to do things would be to just run:
+```bash
+sudo pip3 install smbus2
+```
+
+### DBus Configuration
+DBus needs to be configured to allow the specific users and services to
+communicate. This can be done with:
+```bash
+sudo cp aura.conf /etc/dbus-1/system.d/neurotictumbleweed.aura.conf
+```
+
+## Running
+
+Run the daemon as root with:
+```bash
+sudo python3 aura/dbus_server.py
+```
+
+In another terminal, run the GUI with:
+```bash
+sudo python3 aura/gui.py
+```
 ---
 
 ## Bash equivalent:
