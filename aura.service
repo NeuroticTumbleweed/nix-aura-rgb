@@ -1,0 +1,10 @@
+[Unit]
+Description="Asus Graphics Card RGB Color Settings daemon."
+
+[Service]
+Type="dbus"
+BusName="NeuroticTumbleweed.Aura"
+ExecStart=python3 /path/to/aura/aura/dbus_server.py
+
+[Install]
+WantedBy=multi-user.target
